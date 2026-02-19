@@ -642,8 +642,15 @@ p {
 }
 
 .grid-2 {
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--spacing-lg);
+  grid-template-columns: 1.2fr 0.8fr;
+  /* Give slightly more room to the form */
+  gap: var(--spacing-xl);
+}
+
+@media (max-width: 1200px) {
+  .grid-2 {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 @media (max-width: 992px) {
@@ -661,6 +668,7 @@ p {
 .column-right {
   display: flex;
   flex-direction: column;
+  min-width: 350px;
 }
 
 .sticky-preview {
@@ -749,14 +757,58 @@ p {
    =================================== */
 
 .qr-display-container {
-  padding: var(--spacing-lg);
+  padding: var(--spacing-xl);
   background: linear-gradient(135deg, var(--color-bg-secondary) 0%, var(--color-surface) 100%);
   border-radius: var(--radius-lg);
-  border: 1px dashed var(--color-border);
+  border: 4px double var(--color-border-light);
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 350px;
+  min-height: 400px;
+  position: relative;
+  overflow: hidden;
+}
+
+.qr-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.qr-canvas {
+  width: 300px !important;
+  height: 300px !important;
+  max-width: 100%;
+  max-height: 100%;
+  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-md);
+  background: white;
+  padding: var(--spacing-sm);
+  transition: transform var(--transition-base);
+  flex-shrink: 0;
+  display: block;
+}
+
+.qr-canvas.hidden {
+  display: none !important;
+}
+
+.qr-canvas:not(.hidden) {
+  animation: fadeIn var(--transition-base) ease-out;
+}
+
+.qr-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-tertiary);
+  text-align: center;
+  min-height: 300px;
+  width: 100%;
 }
 
 .placeholder-icon {
