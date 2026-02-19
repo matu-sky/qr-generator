@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS qr_codes (
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   type TEXT NOT NULL,
   data JSONB NOT NULL,
+  options JSONB,
   image_data TEXT,
   title TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,

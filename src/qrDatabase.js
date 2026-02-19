@@ -1,7 +1,7 @@
 import { supabase } from './supabase.js'
 
 // QR 코드 저장
-export const saveQRCode = async (type, data, imageData, title = null) => {
+export const saveQRCode = async (type, data, imageData, options = {}, title = null) => {
     try {
         const { data: { user } } = await supabase.auth.getUser()
 
@@ -16,6 +16,7 @@ export const saveQRCode = async (type, data, imageData, title = null) => {
                     user_id: user.id,
                     type,
                     data,
+                    options,
                     image_data: imageData,
                     title
                 }

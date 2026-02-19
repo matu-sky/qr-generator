@@ -20,10 +20,10 @@ export const createURLForm = (onGenerate) => {
   `
 }
 
-export const handleURLSubmit = async (e, canvas) => {
+export const handleURLSubmit = async (e, canvas, options = {}) => {
   e.preventDefault()
   const url = document.getElementById('url-input').value
-  await generateURLQR(url, canvas)
+  await generateURLQR(url, canvas, options)
   return { url }
 }
 
@@ -46,10 +46,10 @@ export const createTextForm = () => {
   `
 }
 
-export const handleTextSubmit = async (e, canvas) => {
+export const handleTextSubmit = async (e, canvas, options = {}) => {
   e.preventDefault()
   const text = document.getElementById('text-input').value
-  await generateTextQR(text, canvas)
+  await generateTextQR(text, canvas, options)
   return { text }
 }
 
@@ -80,11 +80,11 @@ export const createSMSForm = () => {
   `
 }
 
-export const handleSMSSubmit = async (e, canvas) => {
+export const handleSMSSubmit = async (e, canvas, options = {}) => {
   e.preventDefault()
   const phone = document.getElementById('sms-phone').value
   const message = document.getElementById('sms-message').value
-  await generateSMSQR(phone, message, canvas)
+  await generateSMSQR(phone, message, canvas, options)
   return { phone, message }
 }
 
@@ -161,7 +161,7 @@ export const createVCardForm = () => {
   `
 }
 
-export const handleVCardSubmit = async (e, canvas) => {
+export const handleVCardSubmit = async (e, canvas, options = {}) => {
   e.preventDefault()
   const cardData = {
     name: document.getElementById('vcard-name').value,
@@ -172,7 +172,7 @@ export const handleVCardSubmit = async (e, canvas) => {
     website: document.getElementById('vcard-website').value,
     address: document.getElementById('vcard-address').value,
   }
-  await generateVCardQR(cardData, canvas)
+  await generateVCardQR(cardData, canvas, options)
   return cardData
 }
 
@@ -212,14 +212,14 @@ export const createWiFiForm = () => {
   `
 }
 
-export const handleWiFiSubmit = async (e, canvas) => {
+export const handleWiFiSubmit = async (e, canvas, options = {}) => {
   e.preventDefault()
   const wifiData = {
     ssid: document.getElementById('wifi-ssid').value,
     password: document.getElementById('wifi-password').value,
     encryption: document.getElementById('wifi-encryption').value,
   }
-  await generateWiFiQR(wifiData, canvas)
+  await generateWiFiQR(wifiData, canvas, options)
   return wifiData
 }
 
@@ -270,7 +270,7 @@ export const createBankTransferForm = () => {
   `
 }
 
-export const handleBankTransferSubmit = async (e, canvas) => {
+export const handleBankTransferSubmit = async (e, canvas, options = {}) => {
   e.preventDefault()
   const bankData = {
     bankName: document.getElementById('bank-name').value,
@@ -278,7 +278,7 @@ export const handleBankTransferSubmit = async (e, canvas) => {
     accountHolder: document.getElementById('bank-holder').value,
     amount: document.getElementById('bank-amount').value,
   }
-  await generateBankTransferQR(bankData, canvas)
+  await generateBankTransferQR(bankData, canvas, options)
   return bankData
 }
 
@@ -366,7 +366,7 @@ export const handleMenuFormSetup = () => {
   })
 }
 
-export const handleMenuSubmit = async (e, canvas) => {
+export const handleMenuSubmit = async (e, canvas, options = {}) => {
   e.preventDefault()
   const restaurantName = document.getElementById('menu-restaurant').value
   const menuItems = Array.from(document.querySelectorAll('.menu-item')).map(item => ({
@@ -376,6 +376,6 @@ export const handleMenuSubmit = async (e, canvas) => {
   })).filter(item => item.name && item.price)
 
   const menuData = { restaurantName, items: menuItems }
-  await generateMenuQR(menuData, canvas)
+  await generateMenuQR(menuData, canvas, options)
   return menuData
 }
