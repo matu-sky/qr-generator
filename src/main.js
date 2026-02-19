@@ -1,6 +1,10 @@
 import './style.css'
 import { getCurrentUser, signIn, signUp, signOut, onAuthStateChange } from './supabase.js'
-import { downloadQRCode, canvasToBase64 } from './qrGenerator.js'
+import {
+  downloadQRCode, canvasToBase64,
+  generateURLQR, generateTextQR, generateSMSQR,
+  generateVCardQR, generateWiFiQR, generateBankTransferQR, generateMenuQR
+} from './qrGenerator.js'
 import {
   createURLForm, handleURLSubmit,
   createTextForm, handleTextSubmit,
@@ -519,56 +523,31 @@ const setupMainListeners = () => {
 
 // QR 리제너레이션 (디자인 설정 변경 시)
 const regenerateQR = async () => {
-  if (!currentQRData || !currentCanvas) return
+  if (!currentQRData) return
 
   try {
-    let submitHandler = null
+    const canvas = document.getElementById('qr-canvas')
+    if (!canvas) {
+      console.warn('QR canvas element not found for regeneration.')
+      return
+    }
+
+    // 디자인 변경 시에도 미리보기 보이기
+    canvas.classList.remove('hidden')
+    const placeholder = document.getElementById('qr-placeholder')
+    if (placeholder) placeholder.classList.add('hidden')
+
     switch (currentQRType) {
-      case 'url': submitHandler = handleURLSubmit; break
-      case 'text': submitHandler = handleTextSubmit; break
-      case 'sms': submitHandler = handleSMSSubmit; break
-      case 'vcard': submitHandler = handleVCardSubmit; break
-      case 'wifi': submitHandler = handleWiFiSubmit; break
-      case 'bank': submitHandler = handleBankTransferSubmit; break
-      case 'menu': submitHandler = handleMenuSubmit; break
+      case 'url': await generateURLQR(currentQRData.url, canvas, qrOptions); break
+      case 'text': await generateTextQR(currentQRData.text, canvas, qrOptions); break
+      case 'sms': await generateSMSQR(currentQRData.phone, currentQRData.message, canvas, qrOptions); break
+      case 'vcard': await generateVCardQR(currentQRData, canvas, qrOptions); break
+      case 'wifi': await generateWiFiQR(currentQRData, canvas, qrOptions); break
+      case 'bank': await generateBankTransferQR(currentQRData, canvas, qrOptions); break
+      case 'menu': await generateMenuQR(currentQRData, canvas, qrOptions); break
+      default: console.warn('Unknown QR type for regeneration:', currentQRType); break
     }
-
-    if (submitHandler) {
-      // 가짜 이벤트 객체 생성 (preventDefault 무시용)
-      const fakeEvent = { preventDefault: () => { } }
-
-      // 입력 필드에서 데이터를 직접 가져올 수 있도록 submitHandler 수정이 필요할 수 있으나
-      // 현재는 currentQRData가 이미 저장되어 있으므로, 
-      // 만약 submitHandler가 currentQRData를 직접 사용할 수 있게 되어있다면 편리함.
-      // 하지만 현재 submitHandler는 DOM에서 직접 가져옴.
-
-      // 그래서 여기서는 직접 generator 함수를 호출하거나, 
-      // submitHandler가 currentQRData를 인자로 받을 수 있게 하거나,
-      // 아니면 그냥 qr-form을 다시 trigger 하는 방법이 있음.
-      // 하지만 qr-form trigger는 DOM 상태에 의존하므로 가장 안전함.
-
-      const qrForm = document.getElementById('qr-form')
-      if (qrForm) {
-        // 디자인 설정 변경으로 인한 자동 리제너레이션은 submit 이벤트를 트리거함
-        // data만 알고 있을 때의 처리를 위해 generator들을 직접 쓸 수도 있음.
-
-        // 일단은 currentQRData가 있으므로 다시 그리는 로직을 qrGenerator에서 가져옴
-        const {
-          generateURLQR, generateTextQR, generateSMSQR,
-          generateVCardQR, generateWiFiQR, generateBankTransferQR, generateMenuQR
-        } = await import('./qrGenerator.js')
-
-        switch (currentQRType) {
-          case 'url': await generateURLQR(currentQRData.url, currentCanvas, qrOptions); break
-          case 'text': await generateTextQR(currentQRData.text, currentCanvas, qrOptions); break
-          case 'sms': await generateSMSQR(currentQRData.phone, currentQRData.message, currentCanvas, qrOptions); break
-          case 'vcard': await generateVCardQR(currentQRData, currentCanvas, qrOptions); break
-          case 'wifi': await generateWiFiQR(currentQRData, currentCanvas, qrOptions); break
-          case 'bank': await generateBankTransferQR(currentQRData, currentCanvas, qrOptions); break
-          case 'menu': await generateMenuQR(currentQRData, currentCanvas, qrOptions); break
-        }
-      }
-    }
+    console.log(`QR regenerated for type: ${currentQRType}`);
   } catch (error) {
     console.error('QR 재생성 오류:', error)
   }
@@ -797,12 +776,18 @@ const loadFormForTab = (tabId, initialData = null) => {
   // 폼 제출 이벤트
   newForm.addEventListener('submit', async (e) => {
     try {
-      const data = await submitHandler(e, currentCanvas, qrOptions)
+      const canvas = document.getElementById('qr-canvas')
+      const placeholder = document.getElementById('qr-placeholder')
+
+      // 1. 먼저 캔버스를 표시 (일부 라이브러리/브라우저 이슈 방지)
+      canvas.classList.remove('hidden')
+      placeholder.classList.add('hidden')
+
+      // 2. QR 코드 생성
+      const data = await submitHandler(e, canvas, qrOptions)
       currentQRData = data // 생성된 데이터 저장
 
-      // QR 코드 표시
-      document.getElementById('qr-canvas').classList.remove('hidden')
-      document.getElementById('qr-placeholder').classList.add('hidden')
+      // 3. 버튼 활성화
       document.getElementById('download-btn').disabled = false
       document.getElementById('copy-btn').disabled = false
 
@@ -810,6 +795,7 @@ const loadFormForTab = (tabId, initialData = null) => {
       saveBtn.disabled = false
       saveBtn.textContent = '💾 저장'
     } catch (error) {
+      console.error('QR 생성 오류:', error)
       alert('오류: ' + error.message)
     }
   })
